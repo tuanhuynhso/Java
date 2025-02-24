@@ -5,7 +5,7 @@ public class jvalol{
 
         String name = "Jerry";
         System.out.println(name.toUpperCase());
-    }
+    
                 jl2 = ImageIO.read(getClass().getResource("/Player/Jumping/L/tile001.png"));\\
             jl3 = ImageIO.read(getClass().getResource("/Player/jumping/L/tile002.png"));
             jl4 = ImageIO.read(getClass().getResource("/Player/jumping/L/tile003.png"));

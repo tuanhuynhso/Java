@@ -12,18 +12,18 @@ import main.keyhandle;
 
 public class Player extends Entity {
 
+    public int zHoldTime;
     game_panel gp;
     keyhandle keyH;
     BufferedImage image = null;
-    
     BufferedImage[] jl = new BufferedImage[12];
     BufferedImage[] jr = new BufferedImage[12];
     BufferedImage[] l = new BufferedImage[8];
     BufferedImage[] r = new BufferedImage[8];
     BufferedImage[] il = new BufferedImage[6];
     BufferedImage[] ir = new BufferedImage[6];
-    BufferedImage[] al = new BufferedImage[3];
-    BufferedImage[] ar = new BufferedImage[3];
+    BufferedImage[] al = new BufferedImage[6];
+    BufferedImage[] ar = new BufferedImage[6];
 
     public Player(game_panel gp, keyhandle keyH) {
         this.gp = gp;
@@ -60,7 +60,7 @@ public class Player extends Entity {
                 il[i] = ImageIO.read(getClass().getResource("/resources/Player/Idle/L/tile" + String.format("%03d", i) + ".png"));
                 ir[i] = ImageIO.read(getClass().getResource("/resources/Player/Idle/R/tile" + String.format("%03d", i) + ".png"));
             }
-            for (int i = 0; i > 6; i++){
+            for (int i = 0; i < 6; i++){
                 al[i] = ImageIO.read(getClass().getResource("/resources/Player/Attacking/L/tile" + String.format("%03d", i) + ".png"));
                 ar[i] = ImageIO.read(getClass().getResource("/resources/Player/Attacking/R/tile" + String.format("%03d", i) + ".png"));
             }
@@ -103,7 +103,7 @@ public class Player extends Entity {
         if (keyH.downPressed) {
             jmp -= 1;
         }
-        if (keyH.rightPressed) {
+        if (keyH.rightPressed && zHoldTime == 0 && animationLocked == false) {
             x += spd;
             if (grounded==true && action!= "jr"){
                 action = "r";
@@ -112,7 +112,7 @@ public class Player extends Entity {
                 action = "jr";
             }
         }
-        if (keyH.leftPressed) {
+        if (keyH.leftPressed && zHoldTime == 0 && animationLocked == false) {
             x -= spd;
             if (grounded==true && action!= "jl"){
             action = "l";
@@ -121,24 +121,32 @@ public class Player extends Entity {
                 action = "jl";
             }
         }
-        if (keyH.downPressed==false && keyH.leftPressed==false && keyH.rightPressed==false && keyH.upPressed==false){
-            if(action=="l"){
+        if (keyH.downPressed==false && keyH.leftPressed==false && keyH.rightPressed==false && keyH.upPressed==false && zHoldTime == 0 && animationLocked == false){
+            if(action=="l" || action=="al"){
                 action = "il";
             }
-            if(action=="r"){
+            if(action=="r" || action=="ar"){
                 action = "ir";
             } 
         }
-        if (keyH.zPressed == true){
-            if (action=="l"){
+        if (keyH.zPressed == true && zHoldTime==0){
+            if (action=="l" || action=="il"){
             action = "al";
             }
-            else if (action=="r"){
+            else if (action=="r" || action=="ir"){
             action = "ar";
             }
             else if (action=="jl"){
                 //add stopping animation as well as aiming with mouse via rotation
             }
+            zHoldTime++;
+            spd = 10;
+            animationLocked = true;
+            i=0;
+        }
+        else if (keyH.zPressed == false && animationLocked==false){
+            zHoldTime=0;
+            spd = 20;
         }
 
         //animation//
@@ -203,29 +211,32 @@ public class Player extends Entity {
             i++;
         }
         else if(action=="il"){
-            if (i>=6){
-                i=0;
-            }
+            i = (i + 1) % 6; 
             image = il[i];
-            i++;
         }
         else if(action=="ir"){
-            if (i>=6){
-                i=0;
-            }
+            i = (i + 1) % 6; 
             image = ir[i];
-            i++;
         }
         if (action=="ar"){
             if (i>=5){
                 i=3;
+                animationLocked = false;
             }
            image = ar[i];
            i++;
         }
+        if (action=="al"){
+            if (i>=5){
+                i=3;
+                animationLocked = false;
+            }
+           image = al[i];
+           i++;
+        }
         spritecounter=0;
     }
-    System.out.println("Y: " + y + " | Jump: " + jmp + " | Grounded: " + grounded + " | Action: " + action);
+    System.out.println("Y: " + y + " | Jump: " + jmp + " | Grounded: " + grounded + " | Action: " + action + " | zHoldTime: " + zHoldTime);
     System.out.println("Frame index: " + i + " | Action: " + action);
 
         spritecounter++;
@@ -234,7 +245,7 @@ public class Player extends Entity {
 
     public void draw(Graphics2D g2) {
     
-        g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null);
+        g2.drawImage(image, x, y, gp.tileSize*2, gp.tileSize*2, null);
     
     
     //    g2.setColor(Color.white);
